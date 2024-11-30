@@ -1,34 +1,36 @@
-from http.server import BaseHTTPRequestHandler, HTTPServer
-from threading import Thread
-from telegram import Bot
-from telegram.ext import Updater, CommandHandler
+from flask import Flask
+from telegram import Update
+from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes
 
-# إعداد البوت
+# إعداد التوكن الخاص بالبوت
 TOKEN = "7546741251:AAFe0ynVnQfODznUSRAAuRBEmJUvu35EP9c"
 
-def start(update, context):
-    update.message.reply_text("مرحبا بك في بوت عمران!")
+# إنشاء تطبيق Flask
+app = Flask(__name__)
 
-updater = Updater(TOKEN)
-updater.dispatcher.add_handler(CommandHandler("start", start))
+# صفحة رئيسية وهمية لمتطلبات Koyeb
+@app.route("/")
+def home():
+    return "The Telegram Bot is running on Koyeb!"
 
-# تشغيل خادم ويب وهمي
-class HealthCheckHandler(BaseHTTPRequestHandler):
-    def do_GET(self):
-        self.send_response(200)
-        self.end_headers()
-        self.wfile.write(b"OK")
+# دالة الرد على أمر /start
+async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await update.message.reply_text("سلام عليكم، انا بوت عمران!")
 
-def run_server():
-    server = HTTPServer(('0.0.0.0', 8000), HealthCheckHandler)
-    server.serve_forever()
+# تشغيل البوت
+async def run_bot():
+    app = ApplicationBuilder().token(TOKEN).build()
+    app.add_handler(CommandHandler("start", start))
+    print("Bot is running...")
+    await app.run_polling()
 
 if __name__ == "__main__":
-    # تشغيل خادم الصحة في خيط مستقل
-    Thread(target=run_server, daemon=True).start()
-    print("Health check server is running on port 8000...")
-    
-    # تشغيل البوت
-    print("Bot is running...")
-    updater.start_polling()
-    updater.idle()
+    import threading
+    import asyncio
+
+    # تشغيل بوت تيليجرام في خيط منفصل
+    bot_thread = threading.Thread(target=lambda: asyncio.run(run_bot()), daemon=True)
+    bot_thread.start()
+
+    # تشغيل تطبيق Flask
+    app.run(host="0.0.0.0", port=8000)
