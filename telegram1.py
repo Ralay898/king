@@ -1,5 +1,5 @@
 from telegram import Bot, Update
-from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
+from telegram.ext import Updater, CommandHandler, MessageHandler, filters
 
 # التوكن الخاص بالبوت
 bot_token = '7546741251:AAFe0ynVnQfODznUSRAAuRBEmJUvu35EP9c'
