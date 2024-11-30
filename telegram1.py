@@ -1,5 +1,5 @@
 import logging
-from telegram import Update
+fro telegram import Update
 from telegram.ext import Application, CommandHandler, ContextTypes
 
 # إعداد التوكن الخاص بك
