@@ -1,5 +1,5 @@
 from telegram import Bot, Update
-from telegram.ext import Updater, CommandHandler, MessageHandler, filters
+from telegram.ext import Updater, CommandHandler, MessageHandler, filters  # لاحظ التغيير هنا
 
 # التوكن الخاص بالبوت
 bot_token = '7546741251:AAFe0ynVnQfODznUSRAAuRBEmJUvu35EP9c'
@@ -24,7 +24,7 @@ def main():
     dispatcher.add_handler(start_handler)
 
     # إضافة معالج للرسائل
-    echo_handler = MessageHandler(Filters.text & ~Filters.command, echo)
+    echo_handler = MessageHandler(filters.text & ~filters.command, echo)  # التغيير هنا
     dispatcher.add_handler(echo_handler)
 
     # بدء الـ polling
