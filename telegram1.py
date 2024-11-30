@@ -1,32 +1,25 @@
-from flask import Flask
-from telegram.ext import Application, CommandHandler
-import asyncio
+from flask import Flask, request
+import telegram
 
-# إعداد البوت
-TOKEN = "7546741251:AAFe0ynVnQfODznUSRAAuRBEmJUvu35EP9c"
-app = Application.builder().token(TOKEN).build()
+app = Flask(__name__)
 
-# تعريف أمر بسيط
-async def start(update, context):
-    await update.message.reply_text("Hello! I'm running on Flask and Telegram.")
+# إضافة التوكن الخاص بالبوت
+bot = telegram.Bot(token='7546741251:AAFe0ynVnQfODznUSRAAuRBEmJUvu35EP9c')
 
-app.add_handler(CommandHandler("start", start))
+@app.route('/webhook', methods=['POST'])
+def webhook():
+    # استلام البيانات من تيليجرام
+    update = telegram.Update.de_json(request.get_json(force=True), bot)
+    
+    # استخراج الرسالة من الـ update
+    chat_id = update.message.chat_id
+    text = update.message.text
+    
+    # إرسال الرد على الرسالة
+    bot.sendMessage(chat_id=chat_id, text=f'You said: {text}')
+    
+    # إعادة OK كإجابة على الويب هوك
+    return 'OK'
 
-# إعداد Flask
-flask_app = Flask(__name__)
-
-@flask_app.route("/")
-def home():
-    return "Bot is running!"
-
-# تشغيل Flask والبوت
-if __name__ == "__main__":
-    # تشغيل Telegram bot في نفس الخيط
-    async def run_telegram():
-        await app.run_polling()
-
-    loop = asyncio.get_event_loop()
-    loop.create_task(run_telegram())
-
-    # تشغيل Flask
-    flask_app.run(host="0.0.0.0", port=8000)
+if __name__ == '__main__':
+    app.run(debug=True, host='0.0.0.0', port=8000)
