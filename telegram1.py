@@ -1,36 +1,32 @@
 from flask import Flask
-from telegram import Update
-from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes
+from telegram.ext import Application, CommandHandler
+import asyncio
 
-# إعداد التوكن الخاص بالبوت
+# إعداد البوت
 TOKEN = "7546741251:AAFe0ynVnQfODznUSRAAuRBEmJUvu35EP9c"
+app = Application.builder().token(TOKEN).build()
 
-# إنشاء تطبيق Flask
-app = Flask(__name__)
+# تعريف أمر بسيط
+async def start(update, context):
+    await update.message.reply_text("Hello! I'm running on Flask and Telegram.")
 
-# صفحة رئيسية وهمية لمتطلبات Koyeb
-@app.route("/")
+app.add_handler(CommandHandler("start", start))
+
+# إعداد Flask
+flask_app = Flask(__name__)
+
+@flask_app.route("/")
 def home():
-    return "The Telegram Bot is running on Koyeb!"
+    return "Bot is running!"
 
-# دالة الرد على أمر /start
-async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text("سلام عليكم، انا بوت عمران!")
-
-# تشغيل البوت
-async def run_bot():
-    app = ApplicationBuilder().token(TOKEN).build()
-    app.add_handler(CommandHandler("start", start))
-    print("Bot is running...")
-    await app.run_polling()
-
+# تشغيل Flask والبوت
 if __name__ == "__main__":
-    import threading
-    import asyncio
+    # تشغيل Telegram bot في نفس الخيط
+    async def run_telegram():
+        await app.run_polling()
 
-    # تشغيل بوت تيليجرام في خيط منفصل
-    bot_thread = threading.Thread(target=lambda: asyncio.run(run_bot()), daemon=True)
-    bot_thread.start()
+    loop = asyncio.get_event_loop()
+    loop.create_task(run_telegram())
 
-    # تشغيل تطبيق Flask
-    app.run(host="0.0.0.0", port=8000)
+    # تشغيل Flask
+    flask_app.run(host="0.0.0.0", port=8000)
