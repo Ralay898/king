@@ -1,25 +1,37 @@
-from flask import Flask, request
-import telegram
+from telegram import Bot, Update
+from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
 
-app = Flask(__name__)
+# التوكن الخاص بالبوت
+bot_token = '7546741251:AAFe0ynVnQfODznUSRAAuRBEmJUvu35EP9c'
 
-# إضافة التوكن الخاص بالبوت
-bot = telegram.Bot(token='7546741251:AAFe0ynVnQfODznUSRAAuRBEmJUvu35EP9c')
+# دالة البدء التي ترسل رسالة ترحيب
+def start(update, context):
+    update.message.reply_text("Hello! I'm your bot.")
 
-@app.route('/webhook', methods=['POST'])
-def webhook():
-    # استلام البيانات من تيليجرام
-    update = telegram.Update.de_json(request.get_json(force=True), bot)
-    
-    # استخراج الرسالة من الـ update
-    chat_id = update.message.chat_id
+# دالة الرد على الرسائل
+def echo(update, context):
     text = update.message.text
-    
-    # إرسال الرد على الرسالة
-    bot.sendMessage(chat_id=chat_id, text=f'You said: {text}')
-    
-    # إعادة OK كإجابة على الويب هوك
-    return 'OK'
+    update.message.reply_text(f'You said: {text}')
+
+# إعداد البوت واستخدام Polling
+def main():
+    # إعداد Updater وBot
+    updater = Updater(token=bot_token, use_context=True)
+    dispatcher = updater.dispatcher
+
+    # إضافة معالجي الأوامر
+    start_handler = CommandHandler('start', start)
+    dispatcher.add_handler(start_handler)
+
+    # إضافة معالج للرسائل
+    echo_handler = MessageHandler(Filters.text & ~Filters.command, echo)
+    dispatcher.add_handler(echo_handler)
+
+    # بدء الـ polling
+    updater.start_polling()
+
+    # تشغيل البوت حتى يتم إيقافه يدويًا
+    updater.idle()
 
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=8000)
+    main(), host='0.0.0.0', port=8000)
